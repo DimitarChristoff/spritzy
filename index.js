@@ -51,10 +51,16 @@
 			this.element = element;
 			this.setOptions(options);
 
-			this.text = this.options.text ? this.getWords(this.options.text) : '';
+			/**
+			 * Contains the current word stack we are reading.
+			 * @type {Array}
+			 */
+			this.text = this.options.text ? this.getWords(this.options.text) : [];
+
 			this.setElement();
 			this.attachEvents();
-			this.text && this.read();
+
+			this.text.length && this.read();
 
 			this.options.resetCache && (cache = {});
 			this.trigger('ready');
@@ -195,6 +201,7 @@
 				count = this.count;
 
 			this.resetStats();
+			//todo: decopuple. move to micro templating.
 			o.showStats && (count.innerHTML = ++this.counter + ' words in ' + ((this.getNow() - this.timer) / 1000 >> 0) + 's');
 
 			for (k in wordObj)
