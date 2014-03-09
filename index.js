@@ -1,18 +1,46 @@
-define(function(require){
+;(function(factory){
+	// UMD wrap
+	if (typeof define === 'function' && define.amd){
+		define([
+			'primish/primish',
+			'primish/options',
+			'primish/emitter'
+		], factory);
+	} else if (typeof module !== 'undefined' && module.exports){
+		module.exports = factory(
+			require('primish'),
+			require('primish/options'),
+			require('primish/emitter')
+		);
+	} else {
+		this.spritzy = factory(this.primish, this.options, this.emitter);
+	}
+}).call(this, function(primish){
 
-	var primish = require('primish/primish'),
-		options = require('primish/options'),
-		emitter = require('primish/emitter');
+	// ORP cache
+	var cache = {};
 
 	return primish({
 
 		implement: [options, emitter],
 
 		options: {
+			// roughly 600wpm
 			baseSpeed: 80,
+			// extra delay in ms per letter
+			letterDelay: 10,
+			// use the count / speed stats
 			showStats: true,
+			// allow changing speed, restarting etc
 			showControls: true,
+			// when done, re-start from beginning
 			cycle: true,
+			// use a word cache (processed ORP)
+			cache: true,
+			// reset shared cache when instantiating
+			resetCache: false,
+
+			// element selectors (CSS classes)
 			pre: 'pre',
 			orp: 'orp',
 			post: 'post',
@@ -22,10 +50,13 @@ define(function(require){
 		constructor: function(element, options){
 			this.element = element;
 			this.setOptions(options);
+
 			this.text = this.options.text ? this.getWords(this.options.text) : '';
 			this.setElement();
 			this.attachEvents();
-			this.text && this.startReading();
+			this.text && this.read();
+
+			this.options.resetCache && (cache = {});
 			this.trigger('ready');
 		},
 
@@ -79,13 +110,10 @@ define(function(require){
 		getSyllableCount: function(word){
 			// syllable count.
 			word = word.toLowerCase();
-			if (word.length <= 3)
-				return 1;
 
-			// cleanup
-			word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-			word = word.replace(/^y/, '');
-			return word.match(/[aeiouy]{1,2}/g).length;
+			return word.length <= 3
+				? 1
+				: word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, '').match(/[aeiouy]{1,2}/g).length;
 		},
 
 		/**
@@ -94,36 +122,36 @@ define(function(require){
 		 * @returns {object}
 		 */
 		getORP: function(word){
-			var s = this.getSyllableCount(word),
-				o = {
-					length: s
+			if (this.options.cache && cache[word] != null)
+				return cache[word];
+
+			var count = this.getSyllableCount(word),
+				obj = {
+					orp: '', // Optimal Recognition Point
+					pre: '&nbsp;',
+					length: count,
+					post: '&nbsp;'
 				},
-				p;
+				pos;
 
 			// one syllable is easy.
-			if (s == 1){
-				p = (word.length / 2 >> 0);
-				p > 1 && word.length % 2 == 0 && p--;
-				o.pre = '&nbsp;';
-				p && (o.pre = word.substr(0, p));
-				o.orp = word.charAt(p);
-
-				o.post = '&nbsp;';
-				p < word.length - 1 && (o.post = word.substr(p + 1));
+			if (count == 1){
+				pos = (word.length / 2 >> 0);
+				pos > 1 && word.length % 2 == 0 && pos--;
 			}
 			else {
-				p = (word.length / 3 >> 0);
-				p > 2 && p--;
-				// p > 1 && w.length % 2 == 0 && p--;
-				o.pre = '&nbsp;';
-				p && (o.pre = word.substr(0, p));
-				o.orp = word.charAt(p);
-
-				o.post = '&nbsp;';
-				p < word.length - 1 && (o.post = word.substr(p + 1));
-
+				// lean left-ish at around 33%. Crude and probably wrong.
+				pos = (word.length / 3 >> 0);
+				pos > 2 && pos--;
 			}
-			return o;
+
+			pos && (obj.pre = word.substr(0, pos));
+			obj.orp = word.charAt(pos);
+			pos < word.length - 1 && (obj.post = word.substr(pos + 1));
+
+			this.options.cache && (cache[word] = obj);
+
+			return obj;
 		},
 
 		/**
@@ -148,32 +176,42 @@ define(function(require){
 		/**
 		 * @description Resets the counter of words read and the initial time.
 		 */
-		setStats: function(){
+		resetStats: function(){
 			this.counter == null && (this.counter = 0);
 			this.time == null && (this.time = this.getNow());
-			return this;
+
+			return this.trigger('reset');
 		},
 
 		/**
 		 * @description Start reading the word stack.
 		 */
-		startReading: function(){
+		read: function(){
 			var words = this.words.slice(),
 				word = words.shift(),
 				wordObj = this.getORP(word),
-				k;
+				k,
+				o = this.options,
+				count = this.count;
 
-			this.setStats();
-			this.options.showStats &&
-			(this.count.innerHTML = 'Speed: ' + ++this.counter + ' words in ' + ((this.getNow() - this.timer) / 1000 >> 0) + 's');
+			this.resetStats();
+			o.showStats && (count.innerHTML = ++this.counter + ' words in ' + ((this.getNow() - this.timer) / 1000 >> 0) + 's');
 
 			for (k in wordObj)
 				this[k] && (this[k].innerHTML = wordObj[k]);
 
-			// restart
-			words.length || this.options.cycle && (words = this.words.slice());
+			this.trigger('read', word);
 
-			words.length && (this.timer = setTimeout(this.startReading.bind(this), this.options.baseSpeed + word.length * 10));
+			// restart if needed
+			words.length || o.cycle && (words = this.words.slice());
+			// if anything left, set next read cycle.
+			if (words.length){
+				this.timer = setTimeout(this.read.bind(this), o.baseSpeed + word.length * o.letterDelay);
+			}
+			else {
+				// fires when done reading current words array and no cycle is on.
+				this.trigger('end');
+			}
 
 			return this;
 		},
@@ -181,13 +219,16 @@ define(function(require){
 		/**
 		 * @description Stops reading and resets stats.
 		 */
-		stopReading: function(){
+		stop: function(){
 			clearTimeout(this.timer);
+
 			delete this.timer;
 			delete this.counter;
 			delete this.time;
-			return this;
+
+			return this.trigger('stop');
 		}
 
 	});
+
 });
