@@ -1,0 +1,29 @@
+{
+  "name": "spritzy",
+  "description": "spritz fun",
+  "homepage": "https://github.com/DimitarChristoff/spritzy",
+  "version": "0.0.1",
+  "author": "Dimitar Christoff <christoff@gmail.com> (https://twitter.com/D_mitar)",
+  "keywords": [
+    "spritz",
+    "read"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DimitarChristoff/spritzy"
+  },
+  "license": "MIT (http://mootools.net/license.txt)",
+  "dependencies": {
+    "primish": "~0.3.3",
+    "lodash": "~2.4.1"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-express": "~1.2.1",
+    "grunt-express-server": "~0.4.10",
+    "express": "~3.4.7"
+  },
+  "engines": {
+    "node": "~0.8.26"
+  }
+}

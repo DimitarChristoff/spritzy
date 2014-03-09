@@ -1,0 +1,8 @@
+{
+  "name": "spritzy",
+  "version": "0.0.1",
+  "dependencies": {
+    "primish": "0.3.4",
+    "requirejs-text": "~2.0.10"
+  }
+}
