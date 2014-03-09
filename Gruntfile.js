@@ -4,51 +4,24 @@ var path = require('path');
 
 module.exports = function(grunt){
 	grunt.initConfig({
-		project: {
-			less: [
-				'dist/less/pairs.less'
-			]
-		},
-
 		express: {
-			epik: {
+			spritzy: {
 				options: {
-					server: path.resolve('dist/server/index'),
 					port: 8000,
-					bases: path.resolve('dist'),
+					bases: [path.resolve('./'), path.resolve('./bower_components')],
 					//serverreload: true,
-					livereload: true,
-					open: !true
+					open: 'http://localhost:8000/example/'
 					//background: !true
 				}
 			}
-		},
-
-		less: {
-			epik: {
-				files: {
-					'dist/client/css/pairs.css': '<%= project.less %>'
-				}
-			}
-		},
-
-		watch: {
-			less: {
-				files: 'dist/less/pairs.less',
-				tasks: ['less']
-			}
 		}
-
 	});
 
 	grunt.loadNpmTasks('grunt-express');
 	grunt.loadNpmTasks('grunt-contrib-less');
-	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('default', [
-		'less',
 		'express',
-		//'express-keepalive',
-		'watch'
+		'express-keepalive',
 	]);
 };
