@@ -15,7 +15,7 @@
 	} else {
 		this.spritzy = factory(this.primish, this.options, this.emitter);
 	}
-}).call(this, function(primish){
+}).call(this, function(primish, options, emitter){
 
 	// ORP cache
 	var cache = {};
@@ -55,12 +55,12 @@
 			 * Contains the current word stack we are reading.
 			 * @type {Array}
 			 */
-			this.text = this.options.text ? this.getWords(this.options.text) : [];
+			this.words = this.options.text ? this.getWords(this.options.text) : [];
 
 			this.setElement();
 			this.attachEvents();
 
-			this.text.length && this.read();
+			this.words.length && this.read();
 
 			this.options.resetCache && (cache = {});
 			this.trigger('ready');
@@ -76,7 +76,7 @@
 			//todo: move to templating.
 			var el = this.element.querySelector('.' + className);
 			if (!el){
-				document.createElement(tagName || 'div');
+				el = document.createElement(tagName || 'div');
 				el.className = className;
 				this.element.appendChild(el);
 			}
@@ -176,33 +176,41 @@
 		 * @returns {Array}
 		 */
 		getWords: function(text){
-			return this.text = text.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s/);
+			return this.words = text.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s/);
 		},
 
 		/**
 		 * @description Resets the counter of words read and the initial time.
 		 */
 		resetStats: function(){
-			this.counter == null && (this.counter = 0);
-			this.time == null && (this.time = this.getNow());
+			if (this.counter === null || this.time == null || this.elapsed == null){
+				this.counter = 0;
+				this.time = this.getNow();
+				this.elapsed = 0;
+				this.trigger('reset');
+			}
 
-			return this.trigger('reset');
+			return this;
 		},
 
 		/**
 		 * @description Start reading the word stack.
 		 */
-		read: function(){
-			var words = this.words.slice(),
-				word = words.shift(),
+		read: function(words){
+			words || (words = this.words.slice());
+
+			var word = words.shift(),
 				wordObj = this.getORP(word),
 				k,
 				o = this.options,
 				count = this.count;
 
 			this.resetStats();
+
 			//todo: decopuple. move to micro templating.
-			o.showStats && (count.innerHTML = ++this.counter + ' words in ' + ((this.getNow() - this.timer) / 1000 >> 0) + 's');
+			this.counter++;
+			this.elapsed = (this.getNow() - this.time) / 1000 >> 0;
+			o.showStats && (count.innerHTML = this.counter + ' words in ' + this.elapsed + 's');
 
 			for (k in wordObj)
 				this[k] && (this[k].innerHTML = wordObj[k]);
@@ -211,9 +219,10 @@
 
 			// restart if needed
 			words.length || o.cycle && (words = this.words.slice());
+
 			// if anything left, set next read cycle.
 			if (words.length){
-				this.timer = setTimeout(this.read.bind(this), o.baseSpeed + word.length * o.letterDelay);
+				this.timer = setTimeout(this.read.bind(this, words), o.baseSpeed + word.length * o.letterDelay);
 			}
 			else {
 				// fires when done reading current words array and no cycle is on.
