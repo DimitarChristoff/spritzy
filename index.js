@@ -104,7 +104,7 @@
 		 * @returns {string|}
 		 */
 		cleanText: function(t){
-			return t.replace(/[^a-zA-Z0-9\s.!?\-:]/g, '');
+			return t.replace(/[^a-zA-Z0-9\s.!?\-:"']/g, '');
 		},
 
 		/**
