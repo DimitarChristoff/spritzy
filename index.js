@@ -25,8 +25,8 @@
 		implement: [options, emitter],
 
 		options: {
-			// roughly 600wpm
-			baseSpeed: 80,
+			// how long to wait in ms before showing next word (+adjustment per letter and punctuation on top)
+			baseSpeed: 68, // ~500wpm, dependent on text complexity and word length
 			// extra delay in ms per letter
 			letterDelay: 10,
 			// use the count / speed stats
@@ -204,6 +204,8 @@
 			words || (words = this.words.slice());
 
 			var word = words.shift(),
+			// todo: to disable effect of processing time vs cache, should pre-process the lot,
+			// not only the current word as it's blocking and cache is instant after.
 				wordObj = this.getORP(word),
 				k,
 				o = this.options,

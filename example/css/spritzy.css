@@ -4,13 +4,14 @@ div[data-spritzy] {
 
 .reader {
 	border-top: 2px solid black;
-	width: 300px;
+	width: 400px;
 }
 
 .pre, .orp, .post {
 	float: left;
 	font-family: courier, monospace, serif;
-	line-height: 2em;
+	line-height: 2.4em;
+	font-size: 2em;
 }
 
 .pre {
@@ -28,18 +29,18 @@ div[data-spritzy] {
 	position: absolute;
 	background: black;
 	width: 2px;
-	height: 4px;
+	height: .7em;
 	content:"";
 	margin-top: 1.75em;
-	margin-left: -6px;
+	margin-left: -.3em;
 }
 .orp:before {
 	position: absolute;
 	background: black;
 	width: 2px;
-	height: 4px;
+	height: .7em;
 	content:"";
-	margin-left: 4px;
+	margin-left: .3em;
 }
 
 
