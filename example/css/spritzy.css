@@ -1,0 +1,34 @@
+div[data-spritzy] {
+	padding: 20px;
+}
+
+.reader {
+	border-top: 2px solid black;
+	width: 400px;
+}
+
+.pre, .orp, .post {
+	float: left;
+	font-family: courier, monospace, serif;
+	line-height: 2em;
+}
+
+.pre {
+	text-align: right;
+	width: 30%;
+	color: black;
+}
+
+.orp {
+	color: red;
+	width: auto;
+}
+
+.post {
+	width: 60%;
+}
+
+.count {
+	border-top: 2px solid black;
+	clear: both;
+}

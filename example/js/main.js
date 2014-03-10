@@ -15,9 +15,12 @@ require.config({
 
 define(function(require){
 
+	var textNode = document.querySelector('[data-spritzy]'),
+		text = textNode.innerText || textNode.textContent;
+
 	var Sptitzy = require('spritzy'),
 		spritzy = new Sptitzy(document.querySelector('div.reader'), {
-			text: 'The quick brown fox jumps over the lazy dog'
+			text: text
 		});
 
 

@@ -104,7 +104,7 @@
 		 * @returns {string|}
 		 */
 		cleanText: function(t){
-			return t.replace(/[^a-zA-Z0-9\s]/g, '');
+			return t.replace(/[^a-zA-Z0-9\s.!?\-:]/g, '');
 		},
 
 		/**
@@ -115,11 +115,13 @@
 		 */
 		getSyllableCount: function(word){
 			// syllable count.
+			var s = RegExp('[aeiouy]{1,2}', 'g');
+
 			word = word.toLowerCase();
 
-			return word.length <= 3
+			return word.length <= 3 || !word.match(s)
 				? 1
-				: word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, '').match(/[aeiouy]{1,2}/g).length;
+				: word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, '').match(s).length;
 		},
 
 		/**
@@ -176,7 +178,7 @@
 		 * @returns {Array}
 		 */
 		getWords: function(text){
-			return this.words = text.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s/);
+			return this.words = this.cleanText(text).split(/\s/);
 		},
 
 		/**
@@ -210,7 +212,10 @@
 			//todo: decopuple. move to micro templating.
 			this.counter++;
 			this.elapsed = (this.getNow() - this.time) / 1000 >> 0;
-			o.showStats && (count.innerHTML = this.counter + ' words in ' + this.elapsed + 's');
+
+			(this.elapsed % 3 == 0 || this.wpm == null) && (this.wpm = this.counter / this.elapsed * 60 >> 0);
+
+			o.showStats && (count.innerHTML = this.counter + ' words in ' + this.elapsed + 's, avg WPM: ' + this.wpm);
 
 			for (k in wordObj)
 				this[k] && (this[k].innerHTML = wordObj[k]);
