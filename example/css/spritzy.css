@@ -24,6 +24,25 @@ div[data-spritzy] {
 	width: auto;
 }
 
+.orp:after {
+	position: absolute;
+	background: black;
+	width: 2px;
+	height: 4px;
+	content:"";
+	margin-top: 1.75em;
+	margin-left: -6px;
+}
+.orp:before {
+	position: absolute;
+	background: black;
+	width: 2px;
+	height: 4px;
+	content:"";
+	margin-left: 4px;
+}
+
+
 .post {
 	width: 60%;
 }
@@ -31,4 +50,9 @@ div[data-spritzy] {
 .count {
 	border-top: 2px solid black;
 	clear: both;
+	font-family: courier, monospace, serif;
+	font-size: .5em;
+	text-align: center;
+	color: #cccccc;
+	padding-top: .5em;
 }

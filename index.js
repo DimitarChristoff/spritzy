@@ -205,7 +205,8 @@
 				wordObj = this.getORP(word),
 				k,
 				o = this.options,
-				count = this.count;
+				count = this.count,
+				delay = 0;
 
 			this.resetStats();
 
@@ -227,7 +228,8 @@
 
 			// if anything left, set next read cycle.
 			if (words.length){
-				this.timer = setTimeout(this.read.bind(this, words), o.baseSpeed + word.length * o.letterDelay);
+				word.match(RegExp("[.?\:-]")) && (delay += 200);
+				this.timer = setTimeout(this.read.bind(this, words), (o.baseSpeed + word.length * o.letterDelay) + delay);
 			}
 			else {
 				// fires when done reading current words array and no cycle is on.
