@@ -1,5 +1,5 @@
 require.config({
-	baseUrl: '../../',
+	baseUrl: '../',
 	paths: {
 		primish: 'bower_components/primish',
 		spritzy: 'index'
