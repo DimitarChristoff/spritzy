@@ -178,7 +178,9 @@
 		 * @returns {Array}
 		 */
 		getWords: function(text){
-			return this.words = this.cleanText(text).split(/\s/);
+			return this.words = this.cleanText(text).split(/\s/).filter(function(w){
+				return w.length;
+			});
 		},
 
 		/**
@@ -228,7 +230,10 @@
 
 			// if anything left, set next read cycle.
 			if (words.length){
-				word.match(RegExp("[.?\:-]")) && (delay += 200);
+				// adjust for special chars
+				word.match(RegExp("[.?!\:-]")) && (delay += 120);
+				// adjust for conjuctives
+				word.length <= 3 && (delay += 80);
 				this.timer = setTimeout(this.read.bind(this, words), (o.baseSpeed + word.length * o.letterDelay) + delay);
 			}
 			else {

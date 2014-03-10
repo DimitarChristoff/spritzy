@@ -20,7 +20,8 @@ define(function(require){
 
 	var Sptitzy = require('spritzy'),
 		spritzy = new Sptitzy(document.querySelector('div.reader'), {
-			text: text
+			text: text,
+			cycle: false
 		});
 
 
